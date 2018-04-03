@@ -57,10 +57,9 @@ class Word2Vec:
         """
         pair_count = self.data.evaluate_pair_count(self.window_size)
         batch_count = self.iteration * pair_count / self.batch_size
-        process_bar = tqdm(range(int(batch_count)))
         # self.skip_gram_model.save_embedding(
         #     self.data.id2word, 'begin_embedding.txt', self.use_cuda)
-        for i in process_bar:
+        for i in tqdm(range(int(batch_count))):
             pos_pairs = self.data.get_batch_pairs(self.batch_size,
                                                   self.window_size)
             neg_v = self.data.get_neg_v_neg_sampling(pos_pairs, 5)
@@ -80,9 +79,7 @@ class Word2Vec:
             loss.backward()
             self.optimizer.step()
 
-            process_bar.set_description("Loss: %0.8f, lr: %0.6f" %
-                                        (loss.data[0],
-                                         self.optimizer.param_groups[0]['lr']))
+            tqdm.write("Loss: %0.8f, lr: %0.6f" % (loss.data[0], self.optimizer.param_groups[0]['lr']))
             if i * self.batch_size % 100000 == 0:
                 lr = self.initial_lr * (1.0 - 1.0 * i / batch_count)
                 for param_group in self.optimizer.param_groups:
